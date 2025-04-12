@@ -177,10 +177,6 @@ def delete_thumbnail(thumbnail_id):
     db.session.commit()
     return jsonify({"message": "Thumbnail deleted"}), 200
 
-@app.route('/api/placeholder/<int:w>/<int:h>')
-def placeholder(w, h):
-    return app.send_static_file("placeholder.jpg")
-
 @app.route('/api/download_thumbnail/<int:thumbnail_id>')
 def download_thumbnail(thumbnail_id):
     if 'user_id' not in session:
