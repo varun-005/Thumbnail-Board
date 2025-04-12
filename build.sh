@@ -5,8 +5,13 @@ set -o errexit
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-# Print environment for debugging
-echo "DATABASE_URL: $DATABASE_URL"
+# Print environment for debugging (mask sensitive info)
+echo "Database URL format check:"
+python << END
+import os
+url = os.getenv('DATABASE_URL', '')
+print(f"Has URL: {'postgres://' in url or 'postgresql://' in url}")
+END
 
 # Initialize database
 python << END
