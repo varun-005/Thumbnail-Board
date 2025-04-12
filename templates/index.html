@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thumbnail Board Collection</title>
+  <style>
+    /* CSS Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Define light and dark mode variables */
+    :root {
+      --background: #ffffff;
+      --surface: #f0f0f0;
+      --sidebar: #e0e0e0;
+      --primary: #007bff;
+      --text-primary: #000000;
+      --text-secondary: #555555;
+      --border: #cccccc;
+      --card-hover: #d9d9d9;
+    }
+
+    [data-theme="dark"] {
+      --background: #0f0f0f;
+      --surface: #212121;
+      --sidebar: #1a1a1a;
+      --primary: #ff0000;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --border: #303030;
+      --card-hover: #383838;
+    }
+
+    html,
+    body {
+      background-color: var(--background);
+      color: var(--text-primary);
+      font-family: Roboto, Arial, sans-serif;
+      line-height: 1.4;
+      height: 100%;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background-color: var(--sidebar);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-icon {
+      background-color: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    /* New Board Form */
+    .new-board-form {
+      padding: 0 20px 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .new-board-form h3 {
+      margin-bottom: 12px;
+      font-size: 16px;
+      color: var(--text-primary);
+    }
+
+    .new-board-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    .new-board-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .delete-board-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .delete-board-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .board-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .board-item {
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background-color 0.2s;
+    }
+
+    .board-item:hover,
+    .board-item.active {
+      background-color: var(--card-hover);
+    }
+
+    .board-thumbnail {
+      display: none;
+      /* Hide the image logo */
+    }
+
+    .board-name {
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .board-title {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* URL Input Form */
+    .url-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #3ea6ff;
+    }
+
+    .submit-button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .submit-button:hover {
+      background-color: #cc0000;
+    }
+
+    /* Thumbnail Grid */
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      /* Responsive grid layout */
+      gap: 16px;
+      /* Add spacing between thumbnails */
+      padding: 10px;
+      /* Add padding to the grid container */
+      overflow-y: auto;
+      /* Enable scrolling when thumbnails exceed available space */
+    }
+
+    /* Fix thumbnail alignment and ensure it fits the rectangular box */
+    .thumbnail-card {
+      width: 100%;
+      padding-top: 56.25%;
+      /* Maintain a 16:9 aspect ratio */
+      position: relative;
+      /* Ensure child elements are positioned correctly */
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background-color: var(--surface);
+      /* Fallback background color */
+      margin: 0;
+      /* Remove any unintended margins */
+    }
+
+    .thumbnail-card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Ensure the image covers the container */
+      display: block;
+    }
+
+    .thumbnail-card:hover {
+      transform: translateY(-5px);
+      /* Add hover effect */
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Remove old button styles */
+    .delete-thumbnail-btn,
+    .thumbnail-download-btn {
+      display: none;
+    }
+
+    /* Update new delete button style */
+    .thumbnail-delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .thumbnail-card:hover .thumbnail-delete-btn {
+      opacity: 1;
+    }
+
+    /* Add styles for the toggle button */
+    .theme-toggle {
+      position: static;
+      padding: 8px 16px;
+      border-radius: 4px;
+    }
+
+    .theme-toggle:hover {
+      background-color: #0056b3;
+      /* Slightly darker for hover effect */
+    }
+
+    /* Add styles for the board delete button */
+    .board-delete-btn {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      margin-left: 5px;
+    }
+
+    .board-item:hover .board-delete-btn {
+      opacity: 1;
+    }
+
+    .board-edit-btn {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      margin-left: 5px;
+    }
+
+    .board-item:hover .board-edit-btn {
+      opacity: 1;
+    }
+
+    .board-name {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+        /* Stack sidebar and main content vertically */
+      }
+
+      .sidebar {
+        width: 100%;
+        /* Make sidebar full-width */
+        max-height: none;
+        /* Remove max height */
+        overflow-y: auto;
+        /* Enable scrolling if content overflows */
+      }
+
+      .thumbnail-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        /* Adjust thumbnail size for smaller screens */
+      }
+    }
+
+    .logout-btn {
+      position: static;
+      background-color: var(--primary);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+
+    .logout-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .header-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .thumbnail-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .thumbnail-card:hover .thumbnail-actions {
+      opacity: 1;
+    }
+
+    .thumbnail-btn {
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+
+    .thumbnail-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <div class="header-controls">
+      <button class="theme-toggle" id="theme-toggle">🌙</button>
+      <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">▶</div>
+          Thumbnail Boards
+        </div>
+      </div>
+
+      <!-- New Board Form -->
+      <div class="new-board-form">
+        <h3>Create New Board</h3>
+        <button type="button" class="new-board-btn">Add Board</button>
+        <button type="button" class="delete-board-btn">Delete Board</button>
+      </div>
+
+      <div class="board-list">
+        <!-- Dynamically populated board items -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="content-header">
+        <h1 class="board-title"></h1> <!-- Clear default "Gaming Videos" -->
+      </div>
+
+      <!-- URL Input Form -->
+      <form class="url-form" style="display: none;"> <!-- Hide by default -->
+        <input type="text" class="url-input" placeholder="Enter YouTube video URL" aria-label="YouTube video URL">
+        <button type="submit" class="submit-button">Add Thumbnail</button>
+      </form>
+
+      <!-- Thumbnails Grid -->
+      <div class="thumbnail-grid"></div> <!-- Clear default thumbnails -->
+    </div>
+  </div>
+
+  <script>
+    // Automatically name new boards as "Board 1", "Board 2", etc.
+    document.querySelector('.new-board-btn').addEventListener('click', async function () {
+      const boardList = document.querySelector('.board-list');
+      const boardCount = boardList.children.length + 1;
+      const boardName = `Board ${boardCount}`;
+
+      try {
+        const response = await fetch('/api/boards', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: boardName }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || 'Failed to create board.');
+          return;
+        }
+
+        const data = await response.json();
+
+        // Create new board item
+        const newBoard = createBoardItem(data);
+
+        // Add the new board to the list
+        boardList.appendChild(newBoard);
+
+        // Activate the new board
+        document.querySelectorAll('.board-item').forEach(i => i.classList.remove('active'));
+        newBoard.classList.add('active');
+        document.querySelector('.board-title').textContent = boardName;
+
+        // Clear the current thumbnails to simulate loading a new board
+        document.querySelector('.thumbnail-grid').innerHTML = '';
+      } catch (error) {
+        console.error('Error creating board:', error);
+        alert('An error occurred while creating the board.');
+      }
+    });
+
+    // Delete the currently active board
+    document.querySelector('.delete-board-btn').addEventListener('click', async function () {
+      const activeBoard = document.querySelector('.board-item.active');
+      if (!activeBoard) {
+        alert('Please select a board to delete.');
+        return;
+      }
+
+      const boardId = activeBoard.getAttribute('data-board-id');
+      try {
+        const response = await fetch(`/api/boards/${boardId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || 'Failed to delete board.');
+          return;
+        }
+
+        activeBoard.remove();
+        document.querySelector('.board-title').textContent = '';
+        document.querySelector('.thumbnail-grid').innerHTML = '';
+      } catch (error) {
+        console.error('Error deleting board:', error);
+        alert('An error occurred while deleting the board.');
+      }
+    });
+
+    // Board selection
+    const boardItems = document.querySelectorAll('.board-item');
+    boardItems.forEach(item => {
+      item.addEventListener('click', function () {
+        // Remove active class from all items
+        boardItems.forEach(i => i.classList.remove('active'));
+
+        // Add active class to clicked item
+        this.classList.add('active');
+
+        // Update board title
+        const boardName = this.querySelector('.board-name').textContent;
+        document.querySelector('.board-title').textContent = boardName;
+
+        // Add some dummy thumbnails for demonstration
+        const thumbnailGrid = document.querySelector('.thumbnail-grid');
+        thumbnailGrid.innerHTML = '';
+
+        for (let i = 0; i < 12; i++) {
+          const newThumbnail = document.createElement('div');
+          newThumbnail.className = 'thumbnail-card';
+
+          const img = document.createElement('img');
+          img.src = '/api/placeholder/320/180';
+          img.alt = boardName + ' Video';
+
+          newThumbnail.appendChild(img);
+          thumbnailGrid.appendChild(newThumbnail);
+        }
+      });
+    });
+
+    // Simple form handling to add new thumbnails
+    document.querySelector('.url-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const urlInput = document.querySelector('.url-input');
+      const url = urlInput.value.trim();
+
+      if (url) {
+        const activeBoard = document.querySelector('.board-item.active');
+        if (!activeBoard) {
+          alert('Please select a board first.');
+          return;
+        }
+
+        const boardId = activeBoard.getAttribute('data-board-id'); // Get the board ID
+        try {
+          const response = await fetch(`/api/thumbnails/${boardId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            alert(errorData.error || 'Failed to add thumbnail.');
+            return;
+          }
+
+          const data = await response.json();
+
+          // Fetch all thumbnails after adding new one
+          const thumbnailsResponse = await fetch(`/api/thumbnails/${boardId}`);
+          if (thumbnailsResponse.ok) {
+            const thumbnails = await thumbnailsResponse.json();
+            const thumbnailGrid = document.querySelector('.thumbnail-grid');
+            thumbnailGrid.innerHTML = ''; // Clear existing thumbnails
+
+            // Add all thumbnails including the new one
+            thumbnails.forEach(thumbnail => {
+              const thumbnailCard = createThumbnailCard(thumbnail);
+              thumbnailGrid.appendChild(thumbnailCard);
+            });
+          }
+
+          urlInput.value = ''; // Clear input
+        } catch (error) {
+          console.error('Error adding thumbnail:', error);
+          alert('An error occurred while adding the thumbnail.');
+        }
+      }
+    });
+
+    // Fetch boards dynamically from the backend
+    async function fetchBoards() {
+      try {
+        const response = await fetch('/api/boards');
+        if (!response.ok) {
+          throw new Error('Failed to fetch boards');
+        }
+
+        const boards = await response.json();
+        const boardList = document.querySelector('.board-list');
+        boardList.innerHTML = ''; // Clear existing boards
+
+        boards.forEach(board => {
+          const boardItem = createBoardItem(board);
+          boardList.appendChild(boardItem);
+        });
+      } catch (error) {
+        console.error('Error fetching boards:', error);
+      }
+    }
+
+    // Call fetchBoards on page load
+    document.addEventListener('DOMContentLoaded', fetchBoards);
+
+    // Add functionality for the theme toggle button
+    const themeToggleButton = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    themeToggleButton.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      htmlElement.setAttribute('data-theme', newTheme);
+
+      // Update button text
+      themeToggleButton.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    // Set default theme to light
+    htmlElement.setAttribute('data-theme', 'light');
+
+    // Function to create a thumbnail card
+    function createThumbnailCard(thumbnail) {
+      const thumbnailCard = document.createElement('div');
+      thumbnailCard.className = 'thumbnail-card';
+
+      const img = document.createElement('img');
+      img.src = thumbnail.thumbnail_url;
+      img.alt = 'Thumbnail';
+
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'thumbnail-actions';
+
+      // Delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'thumbnail-btn';
+      deleteButton.textContent = '🗑️';
+      deleteButton.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this thumbnail?')) {
+          try {
+            const response = await fetch(`/api/thumbnails/${thumbnail.id}`, {
+              method: 'DELETE'
+            });
+            if (response.ok) {
+              thumbnailCard.remove();
+            } else {
+              alert('Failed to delete thumbnail');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to delete thumbnail');
+          }
+        }
+      });
+
+      // Download button
+      const downloadButton = document.createElement('a');
+      downloadButton.className = 'thumbnail-btn';
+      downloadButton.textContent = '⬇️';
+      downloadButton.href = `/api/download_thumbnail/${thumbnail.id}`;
+      downloadButton.download = `thumbnail_${thumbnail.id}.jpg`;
+
+      actionsDiv.appendChild(deleteButton);
+      actionsDiv.appendChild(downloadButton);
+      thumbnailCard.appendChild(img);
+      thumbnailCard.appendChild(actionsDiv);
+
+      return thumbnailCard;
+    }
+
+    // Function to create a board item
+    function createBoardItem(board) {
+      const boardItem = document.createElement('div');
+      boardItem.className = 'board-item';
+      boardItem.setAttribute('data-board-id', board.id);
+
+      const name = document.createElement('div');
+      name.className = 'board-name';
+      name.textContent = board.name;
+
+      const editButton = document.createElement('button');
+      editButton.className = 'board-edit-btn';
+      editButton.textContent = '✏️';
+
+      // Add event listener to edit the board
+      editButton.addEventListener('click', async function (event) {
+        event.stopPropagation(); // Prevent board selection
+        const newName = prompt('Enter new board name:', board.name);
+
+        if (newName && newName !== board.name) {
+          try {
+            const response = await fetch(`/api/boards/${board.id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name: newName }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              name.textContent = data.name;
+              if (boardItem.classList.contains('active')) {
+                document.querySelector('.board-title').textContent = data.name;
+              }
+            } else {
+              alert('Failed to update board name.');
+            }
+          } catch (error) {
+            console.error('Error updating board:', error);
+            alert('An error occurred while updating the board.');
+          }
+        }
+      });
+
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'board-delete-btn';
+      deleteButton.textContent = '🗑️';
+
+      // Add event listener to delete the board
+      deleteButton.addEventListener('click', async function (event) {
+        event.stopPropagation(); // Prevent board selection
+
+        const boardId = board.id;
+        try {
+          const response = await fetch(`/api/boards/${boardId}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            boardItem.remove(); // Remove the board from the UI
+            // Clear the board title and thumbnails if the deleted board was active
+            if (document.querySelector('.board-title').textContent === board.name) {
+              document.querySelector('.board-title').textContent = '';
+              document.querySelector('.thumbnail-grid').innerHTML = '';
+              document.querySelector('.url-form').style.display = 'none';
+            }
+          } else {
+            alert('Failed to delete board.');
+          }
+        } catch (error) {
+          console.error('Error deleting board:', error);
+          alert('An error occurred while deleting the board.');
+        }
+      });
+
+      boardItem.appendChild(name);
+      boardItem.appendChild(editButton);
+      boardItem.appendChild(deleteButton);
+
+      // Add click event to select the board
+      boardItem.addEventListener('click', async function () {
+        document.querySelectorAll('.board-item').forEach(i => i.classList.remove('active'));
+        boardItem.classList.add('active');
+        document.querySelector('.board-title').textContent = board.name;
+
+        // Show the URL form
+        document.querySelector('.url-form').style.display = 'flex';
+
+        // Fetch and display thumbnails for the selected board
+        const thumbnailGrid = document.querySelector('.thumbnail-grid');
+        thumbnailGrid.innerHTML = ''; // Clear existing thumbnails
+
+        const thumbnailResponse = await fetch(`/api/thumbnails/${board.id}`);
+        if (thumbnailResponse.ok) {
+          const thumbnails = await thumbnailResponse.json();
+          thumbnails.forEach(thumbnail => {
+            const thumbnailCard = createThumbnailCard(thumbnail);
+            thumbnailGrid.appendChild(thumbnailCard);
+          });
+        }
+      });
+
+      return boardItem;
+    }
+
+    // Dynamically update the board title and show the URL form when a board is selected
+    async function fetchBoards() {
+      try {
+        const response = await fetch('/api/boards');
+        if (!response.ok) {
+          throw new Error('Failed to fetch boards');
+        }
+
+        const boards = await response.json();
+        const boardList = document.querySelector('.board-list');
+        boardList.innerHTML = ''; // Clear existing boards
+
+        boards.forEach(board => {
+          const boardItem = createBoardItem(board);
+          boardList.appendChild(boardItem);
+        });
+      } catch (error) {
+        console.error('Error fetching boards:', error);
+      }
+    }
+  </script>
+</body>
+
+</html>

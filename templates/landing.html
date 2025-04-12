@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Thumbnail Board</title>
+    <style>
+        :root {
+            --background: #0f0f0f;
+            --surface: #212121;
+            --sidebar: #1a1a1a;
+            --primary: #ff0000;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border: #303030;
+            --card-hover: #383838;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, var(--surface) 0%, var(--background) 100%);
+        }
+
+        .hero-content {
+            max-width: 650px;
+            opacity: 0;
+            animation: fadeInSlide 1s ease forwards;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            margin-bottom: 25px;
+            line-height: 1.1;
+            position: relative;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 100px;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: lineGrow 0.8s ease forwards 0.5s;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards 0.3s;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--text-primary);
+            padding: 18px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards 0.6s;
+            box-shadow: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            background: #cc0000;
+        }
+
+        .features {
+            padding: 100px 10%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            background: var(--surface);
+        }
+
+        .feature-card {
+            background: var(--background);
+            padding: 35px;
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            border: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+            box-shadow: none;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: var(--card-hover);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes lineGrow {
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .features {
+                padding: 60px 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Organize Your YouTube Thumbnails</h1>
+            <p>Create custom boards, save thumbnails, and manage your YouTube content efficiently with our modern
+                platform.</p>
+            <a href="/app" class="cta-button">Get Started →</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-card" style="animation-delay: 0.2s">
+            <div class="feature-icon">📋</div>
+            <h3>Create Boards</h3>
+            <p>Organize thumbnails into custom boards for better management</p>
+        </div>
+        <div class="feature-card" style="animation-delay: 0.4s">
+            <div class="feature-icon">💾</div>
+            <h3>Save Thumbnails</h3>
+            <p>Save YouTube video thumbnails with a single click</p>
+        </div>
+        <div class="feature-card" style="animation-delay: 0.6s">
+            <div class="feature-icon">🔄</div>
+            <h3>Easy Access</h3>
+            <p>Access your thumbnail collection anytime, anywhere</p>
+        </div>
+    </section>
+</body>
+
+</html>
